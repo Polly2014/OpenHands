@@ -66,7 +66,9 @@ describe("Landing page translations", () => {
       const { t } = useTranslation();
       return (
         <div>
-          <UserAvatar onClick={() => {}} />
+          <UserAvatar onClick={() => { } } signIn={function (): void {
+            throw new Error("Function not implemented.");
+          } } />
           <div data-testid="main-content">
             <h1>{t("LANDING$TITLE")}</h1>
             <button>{t("VSCODE$OPEN")}</button>

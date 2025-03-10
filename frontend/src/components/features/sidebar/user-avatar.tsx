@@ -5,36 +5,47 @@ import ProfileIcon from "#/icons/profile.svg?react";
 import { cn } from "#/utils/utils";
 import { Avatar } from "./avatar";
 import { TooltipButton } from "#/components/shared/buttons/tooltip-button";
+import SignOutIcon from "#/icons/sign-out.svg?react";
 
 interface UserAvatarProps {
   onClick: () => void;
   avatarUrl?: string;
   isLoading?: boolean;
+  userMessage?: string;
+  isSignedIn?: boolean;
+  signIn: () => void;
 }
 
-export function UserAvatar({ onClick, avatarUrl, isLoading }: UserAvatarProps) {
+export function UserAvatar({ onClick, avatarUrl, isLoading, isSignedIn, userMessage, signIn }: UserAvatarProps) {
   const { t } = useTranslation();
   return (
     <TooltipButton
       testId="user-avatar"
-      tooltip={t(I18nKey.USER$ACCOUNT_SETTINGS)}
-      ariaLabel={t(I18nKey.USER$ACCOUNT_SETTINGS)}
-      onClick={onClick}
+      tooltip={userMessage || t(I18nKey.USER$ACCOUNT_SETTINGS)}
+      ariaLabel={userMessage || t(I18nKey.USER$ACCOUNT_SETTINGS)}
       className={cn(
         "w-8 h-8 rounded-full flex items-center justify-center",
         isLoading && "bg-transparent",
       )}
     >
-      {!isLoading && avatarUrl && <Avatar src={avatarUrl} />}
-      {!isLoading && !avatarUrl && (
-        <ProfileIcon
-          aria-label={t(I18nKey.USER$AVATAR_PLACEHOLDER)}
-          width={28}
-          height={28}
-          className="text-[#9099AC]"
-        />
-      )}
-      {isLoading && <LoadingSpinner size="small" />}
+      <div>
+        {isSignedIn ? (<button onClick={onClick}>
+            <ProfileIcon
+              aria-label={userMessage}
+              width={28}
+              height={28}
+              className="text-[#9099AC]"
+            />
+          </button>) : (<button onClick={signIn}>
+            <SignOutIcon
+              aria-label={userMessage}
+              width={28}
+              height={28}
+              className="text-[#9099AC]"
+            />
+          </button>)
+        }
+      </div>
     </TooltipButton>
   );
 }
