@@ -10,6 +10,9 @@ import { AnalyticsConsentFormModal } from "#/components/features/analytics/analy
 import { useSettings } from "#/hooks/query/use-settings";
 import { useAuth } from "#/context/auth-context";
 import { useMigrateUserConsent } from "#/hooks/use-migrate-user-consent";
+import { msalInstance } from "../../msalConfig";
+import { useMsalAuthentication, MsalProvider } from "@azure/msal-react";
+import { InteractionType } from "@azure/msal-browser";
 
 export function ErrorBoundary() {
   const error = useRouteError();
@@ -44,10 +47,19 @@ export function ErrorBoundary() {
 }
 
 export default function MainApp() {
+  return ( <React.StrictMode>
+    <MsalProvider instance={msalInstance}>
+        <MainlyApp />
+      </MsalProvider>
+  </React.StrictMode>);
+}
+
+export function MainlyApp() {
   const { githubTokenIsSet } = useAuth();
   const { data: settings } = useSettings();
   const { migrateUserConsent } = useMigrateUserConsent();
-
+  // Automatically redirect user to login if not yet authenticated
+  useMsalAuthentication(InteractionType.Redirect);
   const [consentFormIsOpen, setConsentFormIsOpen] = React.useState(false);
 
   const config = useConfig();

@@ -128,7 +128,7 @@ export function ChatInput({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         value={value}
-        minRows={1}
+        minRows={5}
         maxRows={maxRows}
         data-dragging-over={isDraggingOver}
         className={cn(

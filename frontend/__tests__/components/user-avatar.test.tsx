@@ -11,7 +11,9 @@ describe("UserAvatar", () => {
   });
 
   it("(default) should render the placeholder avatar when the user is logged out", () => {
-    render(<UserAvatar onClick={onClickMock} />);
+    render(<UserAvatar onClick={onClickMock} signIn={function (): void {
+      throw new Error("Function not implemented.");
+    } } />);
     expect(screen.getByTestId("user-avatar")).toBeInTheDocument();
     expect(
       screen.getByLabelText("USER$AVATAR_PLACEHOLDER"),
@@ -20,7 +22,9 @@ describe("UserAvatar", () => {
 
   it("should call onClick when clicked", async () => {
     const user = userEvent.setup();
-    render(<UserAvatar onClick={onClickMock} />);
+    render(<UserAvatar onClick={onClickMock} signIn={function (): void {
+      throw new Error("Function not implemented.");
+    } } />);
 
     const userAvatarContainer = screen.getByTestId("user-avatar");
     await user.click(userAvatarContainer);
@@ -32,8 +36,9 @@ describe("UserAvatar", () => {
     render(
       <UserAvatar
         onClick={onClickMock}
-        avatarUrl="https://example.com/avatar.png"
-      />,
+        avatarUrl="https://example.com/avatar.png" signIn={function (): void {
+          throw new Error("Function not implemented.");
+        } }      />,
     );
 
     expect(screen.getByAltText("user avatar")).toBeInTheDocument();
@@ -43,13 +48,17 @@ describe("UserAvatar", () => {
   });
 
   it("should display a loading spinner instead of an avatar when isLoading is true", () => {
-    const { rerender } = render(<UserAvatar onClick={onClickMock} />);
+    const { rerender } = render(<UserAvatar onClick={onClickMock} signIn={function (): void {
+      throw new Error("Function not implemented.");
+    } } />);
     expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
     expect(
       screen.getByLabelText("USER$AVATAR_PLACEHOLDER"),
     ).toBeInTheDocument();
 
-    rerender(<UserAvatar onClick={onClickMock} isLoading />);
+    rerender(<UserAvatar onClick={onClickMock} isLoading signIn={function (): void {
+      throw new Error("Function not implemented.");
+    } } />);
     expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
     expect(
       screen.queryByLabelText("USER$AVATAR_PLACEHOLDER"),
@@ -59,8 +68,9 @@ describe("UserAvatar", () => {
       <UserAvatar
         onClick={onClickMock}
         avatarUrl="https://example.com/avatar.png"
-        isLoading
-      />,
+        isLoading signIn={function (): void {
+          throw new Error("Function not implemented.");
+        } }      />,
     );
     expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
     expect(screen.queryByAltText("user avatar")).not.toBeInTheDocument();

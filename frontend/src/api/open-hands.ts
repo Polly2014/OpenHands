@@ -206,9 +206,9 @@ class OpenHands {
 
   static async getUserConversations(): Promise<Conversation[]> {
     const { data } = await openHands.get<ResultSet<Conversation>>(
-      "/api/conversations?limit=9",
+      "/api/conversations?limit=100",
     );
-    return data.results;
+    return getConversationIds(data.results);
   }
 
   static async deleteUserConversation(conversationId: string): Promise<void> {
@@ -239,6 +239,9 @@ class OpenHands {
       body,
     );
 
+    if (data && data.conversation_id) {
+      storeConversationId(data.conversation_id)
+    }
     return data;
   }
 
@@ -342,3 +345,22 @@ class OpenHands {
 }
 
 export default OpenHands;
+
+function storeConversationId(conversationId: string) {
+  let conversationIds = localStorage.getItem('conversationIds');
+    if (!conversationIds) {
+      conversationIds = '[]';
+    }
+
+    const idsArray = JSON.parse(conversationIds);
+    idsArray.push(conversationId);
+    localStorage.setItem('conversationIds', JSON.stringify(idsArray));
+}
+
+function getConversationIds(data: any[]) {
+  const storedIds = localStorage.getItem('conversationIds');
+    const conversationIds = storedIds ? JSON.parse(storedIds) : [];
+    const filtered = data.filter(item => conversationIds.includes(item.conversation_id));
+
+  return filtered;
+};
