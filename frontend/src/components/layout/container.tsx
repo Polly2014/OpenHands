@@ -1,9 +1,13 @@
 import clsx from "clsx";
 import React from "react";
 import { NavTab } from "./nav-tab";
+import { Collapse } from "./resizable-panel";
 
 interface ContainerProps {
   label?: React.ReactNode;
+  collapse?: Collapse;
+  collapseButton?: React.ReactNode;
+  expandButton?: React.ReactNode;
   labels?: {
     label: string | React.ReactNode;
     to: string;
@@ -16,6 +20,9 @@ interface ContainerProps {
 
 export function Container({
   label,
+  collapse,
+  collapseButton,
+  expandButton,
   labels,
   children,
   className,
@@ -35,11 +42,12 @@ export function Container({
         </div>
       )}
       {!labels && label && (
-        <div className="px-2 h-[36px] border-b border-neutral-600 text-xs flex items-center">
+        <div className="px-2 h-[36px] border-b border-neutral-600 text-xs flex items-center justify-between">
           {label}
+          {collapseButton && expandButton && (<div>{collapseButton}{expandButton}</div>)}
         </div>
       )}
-      <div className="overflow-hidden h-full rounded-b-xl">{children}</div>
+      {(!collapse || collapse !== Collapse.FILLED) && <div className="overflow-hidden h-full rounded-b-xl">{children}</div>}
     </div>
   );
 }

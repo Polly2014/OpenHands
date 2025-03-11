@@ -7,8 +7,8 @@ export function HeroHeading() {
   const { t } = useTranslation();
   const { accounts } = useMsal();
   const isSignedIn = !!(accounts && accounts.length > 0);
-  const lastSpaceIndex = isSignedIn && accounts[0]?.name?.lastIndexOf(' ');
-  const userName = (lastSpaceIndex && lastSpaceIndex!== -1) ? accounts[0]?.name?.substring(0, lastSpaceIndex) : accounts[0]?.name;
+    const lastSpaceIndex = isSignedIn && accounts[0]?.name?.lastIndexOf(' ');
+    const userName = (lastSpaceIndex && lastSpaceIndex!== -1) ? accounts[0]?.name?.substring(0, lastSpaceIndex) : accounts[0]?.name;
 
   return (
     <div className="w-[604px] text-center flex flex-col gap-4 items-center py-4">

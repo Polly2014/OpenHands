@@ -7,13 +7,17 @@ import {
 } from "react-icons/vsc";
 import { twMerge } from "tailwind-merge";
 import { IconButton } from "../shared/buttons/icon-button";
-
+import { ChatInterface } from "../features/chat/chat-interface";
+import { Container } from "./container";
+import { TerminalStatusLabel } from "../features/terminal/terminal-status-label";
+import CollapseIcon from "#/icons/collapse.svg?react";
+import ExpandIcon from "#/icons/expand.svg?react";
 export enum Orientation {
   HORIZONTAL = "horizontal",
   VERTICAL = "vertical",
 }
 
-enum Collapse {
+export enum Collapse {
   COLLAPSED = "collapsed",
   SPLIT = "split",
   FILLED = "filled",
@@ -42,8 +46,8 @@ export function ResizablePanel({
   const [dividerPosition, setDividerPosition] = useState<number | null>(null);
   const firstRef = useRef<HTMLDivElement>(null);
   const secondRef = useRef<HTMLDivElement>(null);
-  const [collapse, setCollapse] = useState<Collapse>(Collapse.SPLIT);
   const isHorizontal = orientation === Orientation.HORIZONTAL;
+  const [collapse, setCollapse] = isHorizontal ? useState<Collapse>(Collapse.SPLIT) : useState<Collapse>(Collapse.FILLED);
 
   useEffect(() => {
     if (dividerPosition == null || !firstRef.current) {
@@ -102,7 +106,7 @@ export function ResizablePanel({
 
   const getStyleForFirst = () => {
     const style: CSSProperties = { overflow: "hidden" };
-    if (collapse === Collapse.COLLAPSED) {
+    if (collapse === Collapse.COLLAPSED && !isHorizontal) {
       style.opacity = 0;
       style.width = 0;
       style.minWidth = 0;
@@ -117,7 +121,7 @@ export function ResizablePanel({
         style.height = firstSizePx;
         style.minHeight = firstSizePx;
       }
-    } else {
+    } else if (!isHorizontal) {
       style.flexGrow = 1;
     }
     return style;
@@ -126,11 +130,6 @@ export function ResizablePanel({
   const getStyleForSecond = () => {
     const style: CSSProperties = { overflow: "hidden" };
     if (collapse === Collapse.FILLED) {
-      style.opacity = 0;
-      style.width = 0;
-      style.minWidth = 0;
-      style.height = 0;
-      style.minHeight = 0;
     } else if (collapse === Collapse.SPLIT) {
       style.flexGrow = 1;
     } else {
@@ -155,6 +154,28 @@ export function ResizablePanel({
     }
   };
 
+  const secrets = React.useMemo(
+      // secrets to filter go here
+      () => [].filter((secret) => secret !== null),
+      [],
+    );
+
+    const Terminal = React.useMemo(
+      () => React.lazy(() => import("#/components/features/terminal/terminal")),
+      [],
+    );
+  const collapseButton: React.ReactNode = <IconButton
+    icon={isHorizontal ? <CollapseIcon /> : <VscChevronUp />}
+    ariaLabel="Collapse"
+    onClick={onCollapse}
+  />;
+
+  const expandButton: React.ReactNode = <IconButton
+    icon={isHorizontal ? <ExpandIcon /> : <VscChevronDown />}
+    ariaLabel="Expand"
+    onClick={onExpand}
+  />;
+
   return (
     <div className={twMerge("flex", !isHorizontal && "flex-col", className)}>
       <div
@@ -162,29 +183,32 @@ export function ResizablePanel({
         className={twMerge(firstClassName, "transition-all ease-soft-spring")}
         style={getStyleForFirst()}
       >
-        {firstChild}
+        {isHorizontal ? <ChatInterface collapse={collapse} collapseButton={collapseButton} expandButton={expandButton}></ChatInterface> : firstChild}
       </div>
       <div
-        className={`${isHorizontal ? "cursor-ew-resize w-3 flex-col" : "cursor-ns-resize h-3 flex-row"} shrink-0 flex justify-center items-center`}
+        className={`${isHorizontal ? "cursor-ew-resize w-1 flex-col" : "cursor-ns-resize h-3 flex-row"} shrink-0 flex justify-center items-center`}
         onMouseDown={collapse === Collapse.SPLIT ? onMouseDown : undefined}
       >
-        <IconButton
-          icon={isHorizontal ? <VscChevronLeft /> : <VscChevronUp />}
-          ariaLabel="Collapse"
-          onClick={onCollapse}
-        />
-        <IconButton
-          icon={isHorizontal ? <VscChevronRight /> : <VscChevronDown />}
-          ariaLabel="Expand"
-          onClick={onExpand}
-        />
       </div>
       <div
         ref={secondRef}
         className={twMerge(secondClassName, "transition-all ease-soft-spring")}
         style={getStyleForSecond()}
       >
-        {secondChild}
+        {isHorizontal && secondChild}
+        {!isHorizontal && <Container
+                        className="h-full overflow-scroll"
+                        label={<TerminalStatusLabel />}
+                        collapse={collapse}
+                        collapseButton={collapseButton}
+                        expandButton={expandButton}
+                      >
+                        {/* Terminal uses some API that is not compatible in a server-environment. For this reason, we lazy load it to ensure
+                         * that it loads only in the client-side. */}
+                        <React.Suspense fallback={<div className="h-full" />}>
+                          <Terminal secrets={secrets} />
+                        </React.Suspense>
+                      </Container>}
       </div>
     </div>
   );
