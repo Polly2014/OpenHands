@@ -125,16 +125,16 @@ function AppContent() {
     return (
       <ResizablePanel
         orientation={Orientation.HORIZONTAL}
-        className="grow h-full min-h-0 min-w-0"
+        className="grow h-full min-h-0 min-w-0 conversation-chat-page"
         initialSize={500}
-        firstClassName="rounded-xl overflow-hidden border border-neutral-600 bg-base-secondary"
+        firstClassName="rounded-xl overflow-hidden border border-neutral-600 bg-base-secondary chat-interface"
         secondClassName="flex flex-col overflow-hidden"
         firstChild={<ChatInterface />}
         secondChild={
           <ResizablePanel
             orientation={Orientation.VERTICAL}
             className="grow h-full min-h-0 min-w-0"
-            initialSize={500}
+            initialSize={900}
             firstClassName="rounded-xl overflow-hidden border border-neutral-600"
             secondClassName="flex flex-col overflow-hidden"
             firstChild={
@@ -169,16 +169,7 @@ function AppContent() {
               </Container>
             }
             secondChild={
-              <Container
-                className="h-full overflow-scroll"
-                label={<TerminalStatusLabel />}
-              >
-                {/* Terminal uses some API that is not compatible in a server-environment. For this reason, we lazy load it to ensure
-                 * that it loads only in the client-side. */}
-                <React.Suspense fallback={<div className="h-full" />}>
-                  <Terminal secrets={secrets} />
-                </React.Suspense>
-              </Container>
+              <div></div>
             }
           />
         }
@@ -191,11 +182,6 @@ function AppContent() {
       <EventHandler>
         <div data-testid="app-route" className="flex flex-col h-full gap-3">
           <div className="flex h-full overflow-auto">{renderMain()}</div>
-
-          <Controls
-            setSecurityOpen={onSecurityModalOpen}
-            showSecurityLock={!!settings?.SECURITY_ANALYZER}
-          />
           {settings && (
             <Security
               isOpen={securityModalIsOpen}

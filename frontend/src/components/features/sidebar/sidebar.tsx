@@ -77,67 +77,71 @@ export function Sidebar() {
     posthog.reset();
   };
 
-  return (
-    <>
-      <aside className="h-[40px] md:h-auto px-1 flex flex-row md:flex-col gap-1">
-        <nav className="flex flex-row md:flex-col items-center justify-between w-full h-auto md:w-auto md:h-full">
-          <div className="flex flex-row md:flex-col items-center gap-[26px]">
-            <div className="flex items-center justify-center">
-              <AllHandsLogoButton onClick={handleEndSession} />
+  if (location.pathname.startsWith("/conversations")) {
+    return <></>
+  } else {
+    return (
+      <>
+        <aside className="h-[40px] md:h-auto p-4 flex flex-row md:flex-col gap-1">
+          <nav className="flex flex-row md:flex-col items-center justify-between w-full h-auto md:w-auto md:h-full">
+            <div className="flex flex-row md:flex-col items-center gap-[26px]">
+              <div className="flex items-center justify-center">
+                <AllHandsLogoButton onClick={handleEndSession} />
+              </div>
+              <ExitProjectButton onClick={handleEndSession} />
+              <TooltipButton
+                testId="toggle-conversation-panel"
+                tooltip="Conversations"
+                ariaLabel="Conversations"
+                onClick={() => setConversationPanelIsOpen((prev) => !prev)}
+              >
+                <FaListUl
+                  size={22}
+                  className={cn(
+                    conversationPanelIsOpen ? "text-white" : "text-[#9099AC]",
+                  )}
+                />
+              </TooltipButton>
+              <DocsButton />
             </div>
-            <ExitProjectButton onClick={handleEndSession} />
-            <TooltipButton
-              testId="toggle-conversation-panel"
-              tooltip="Conversations"
-              ariaLabel="Conversations"
-              onClick={() => setConversationPanelIsOpen((prev) => !prev)}
-            >
-              <FaListUl
-                size={22}
-                className={cn(
-                  conversationPanelIsOpen ? "text-white" : "text-[#9099AC]",
-                )}
-              />
-            </TooltipButton>
-            <DocsButton />
-          </div>
 
-          <div className="flex flex-row md:flex-col md:items-center gap-[26px] md:mb-4">
-            <NavLink
-              to="/settings"
-              className={({ isActive }) =>
-                `${isActive ? "text-white" : "text-[#9099AC]"} mt-0.5 md:mt-0`
-              }
-            >
-              <SettingsButton />
-            </NavLink>
-            {!user.isLoading && (
-              <UserActions
-                user={
-                  user.data ? { avatar_url: user.data.avatar_url } : undefined
+            <div className="flex flex-row md:flex-col md:items-center gap-[26px] md:mb-4">
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  `${isActive ? "text-white" : "text-[#9099AC]"} mt-0.5 md:mt-0`
                 }
-                onLogout={handleLogout}
+              >
+                <SettingsButton />
+              </NavLink>
+              {!user.isLoading && (
+                <UserActions
+                  user={
+                    user.data ? { avatar_url: user.data.avatar_url } : undefined
+                  }
+                  onLogout={handleLogout}
+                />
+              )}
+              {user.isLoading && <LoadingSpinner size="small" />}
+            </div>
+          </nav>
+
+          {conversationPanelIsOpen && (
+            <ConversationPanelWrapper isOpen={conversationPanelIsOpen}>
+              <ConversationPanel
+                onClose={() => setConversationPanelIsOpen(false)}
               />
-            )}
-            {user.isLoading && <LoadingSpinner size="small" />}
-          </div>
-        </nav>
+            </ConversationPanelWrapper>
+          )}
+        </aside>
 
-        {conversationPanelIsOpen && (
-          <ConversationPanelWrapper isOpen={conversationPanelIsOpen}>
-            <ConversationPanel
-              onClose={() => setConversationPanelIsOpen(false)}
-            />
-          </ConversationPanelWrapper>
+        {settingsModalIsOpen && (
+          <SettingsModal
+            settings={settings}
+            onClose={() => setSettingsModalIsOpen(false)}
+          />
         )}
-      </aside>
-
-      {settingsModalIsOpen && (
-        <SettingsModal
-          settings={settings}
-          onClose={() => setSettingsModalIsOpen(false)}
-        />
-      )}
-    </>
-  );
+      </>
+    );
+  }
 }

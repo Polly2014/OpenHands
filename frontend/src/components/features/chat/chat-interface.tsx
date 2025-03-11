@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import React from "react";
+import React, { JSX } from "react";
 import posthog from "posthog-js";
 import { useParams } from "react-router";
 import { convertImageToBase64 } from "#/utils/convert-image-to-base-64";
@@ -23,6 +23,18 @@ import { ScrollToBottomButton } from "#/components/shared/buttons/scroll-to-bott
 import { LoadingSpinner } from "#/components/shared/loading-spinner";
 import { useGetTrajectory } from "#/hooks/mutation/use-get-trajectory";
 import { downloadTrajectory } from "#/utils/download-files";
+import { AllHandsLogoButton } from "#/components/shared/buttons/all-hands-logo-button";
+import { ExitProjectButton } from "#/components/shared/buttons/exit-project-button";
+import { TooltipButton } from "#/components/shared/buttons/tooltip-button";
+import { FaListUl } from "react-icons/fa";
+import { ConversationPanelWrapper } from "../conversation-panel/conversation-panel-wrapper";
+import { ConversationPanel } from "../conversation-panel/conversation-panel";
+import { setCurrentAgentState } from "#/state/agent-slice";
+import { useEndSession } from "#/hooks/use-end-session";
+import { cn } from "#/utils/utils";
+import { AgentControlBar } from "../controls/agent-control-bar";
+import { AgentStatusBar } from "../controls/agent-status-bar";
+import { Collapse } from "#/components/layout/resizable-panel";
 
 function getEntryPoint(
   hasRepository: boolean | null,
@@ -33,13 +45,22 @@ function getEntryPoint(
   return "direct";
 }
 
-export function ChatInterface() {
+type ChatInterfaceProps = {
+  collapse?: Collapse;
+  collapseButton?: React.ReactNode;
+  expandButton?: React.ReactNode;
+};
+
+export function ChatInterface({collapse, collapseButton, expandButton}:ChatInterfaceProps ): JSX.Element {
   const { send, isLoadingMessages } = useWsClient();
   const dispatch = useDispatch();
+  const endSession = useEndSession();
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const { scrollDomToBottom, onChatBodyScroll, hitBottom } =
     useScrollToBottom(scrollRef);
 
+  const [conversationPanelIsOpen, setConversationPanelIsOpen] =
+    React.useState(false);
   const { messages } = useSelector((state: RootState) => state.chat);
   const { curAgentState } = useSelector((state: RootState) => state.agent);
 
@@ -115,12 +136,50 @@ export function ChatInterface() {
     });
   };
 
+  const handleEndSession = () => {
+    dispatch(setCurrentAgentState(AgentState.LOADING));
+    endSession();
+  };
+
   const isWaitingForUserInput =
     curAgentState === AgentState.AWAITING_USER_INPUT ||
     curAgentState === AgentState.FINISHED;
 
-  return (
-    <div className="h-full flex flex-col justify-between">
+    if (collapse !== Collapse.COLLAPSED ) {
+      return (
+        <div className="h-full flex flex-col justify-between">
+          <nav className="flex flex-row md:flex-row items-center justify-between w-full h-auto md:w-auto gap-[26px] p-3">
+            <div className="flex flex-row md:flex-row items-center gap-[20px]">
+              <div className="flex items-center justify-center">
+                <AllHandsLogoButton onClick={handleEndSession} />
+              </div>
+              <ExitProjectButton onClick={handleEndSession} />
+              <TooltipButton
+                testId="toggle-conversation-panel"
+                tooltip="Conversations"
+                ariaLabel="Conversations"
+                onClick={() => setConversationPanelIsOpen((prev) => !prev)}
+              >
+                <FaListUl
+                  size={22}
+                  className={cn(
+                    conversationPanelIsOpen ? "text-white" : "text-[#9099AC]",
+                  )}
+                />
+              </TooltipButton>
+            </div>
+            <div className="flex gap-[20px]">
+              <TrajectoryActions onExportTrajectory={() => onClickExportTrajectoryButton()} />
+              {collapseButton && <div style={{top: "4px"}}>{collapseButton}</div>}
+            </div>
+          </nav>
+          {conversationPanelIsOpen && (
+            <ConversationPanelWrapper isOpen={conversationPanelIsOpen}>
+              <ConversationPanel
+                onClose={() => setConversationPanelIsOpen(false)}
+              />
+            </ConversationPanelWrapper>
+          )}
       {messages.length === 0 && (
         <ChatSuggestions onSuggestionsClick={setMessageToSend} />
       )}
@@ -154,15 +213,10 @@ export function ChatInterface() {
 
       <div className="flex flex-col gap-[6px] px-4 pb-4">
         <div className="flex justify-between relative">
-          <TrajectoryActions
-            onPositiveFeedback={() =>
-              onClickShareFeedbackActionButton("positive")
-            }
-            onNegativeFeedback={() =>
-              onClickShareFeedbackActionButton("negative")
-            }
-            onExportTrajectory={() => onClickExportTrajectoryButton()}
-          />
+        <div className="flex items-center gap-2">
+          <AgentControlBar />
+          <AgentStatusBar />
+        </div>
 
           <div className="absolute left-1/2 transform -translate-x-1/2 bottom-0">
             {messages.length > 2 &&
@@ -195,4 +249,12 @@ export function ChatInterface() {
       />
     </div>
   );
+  } else {
+    return (
+      <div className="h-full flex flex-col justify-between">
+      <nav className="flex flex-row md:flex-row items-center justify-between w-full h-auto md:w-auto p-3">
+        {expandButton && expandButton}
+      </nav></div>)
+
+  }
 }

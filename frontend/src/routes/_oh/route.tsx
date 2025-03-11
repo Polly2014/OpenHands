@@ -47,17 +47,18 @@ export function ErrorBoundary() {
 }
 
 export default function MainApp() {
-  return ( <React.StrictMode>
-    <MsalProvider instance={msalInstance}>
-        <MainlyApp />
-      </MsalProvider>
-  </React.StrictMode>);
+ return ( <React.StrictMode>
+  <MsalProvider instance={msalInstance}>
+      <MainlyApp />
+    </MsalProvider>
+</React.StrictMode>);
 }
 
 export function MainlyApp() {
   const { githubTokenIsSet } = useAuth();
   const { data: settings } = useSettings();
   const { migrateUserConsent } = useMigrateUserConsent();
+
   // Automatically redirect user to login if not yet authenticated
   useMsalAuthentication(InteractionType.Redirect);
   const [consentFormIsOpen, setConsentFormIsOpen] = React.useState(false);
@@ -103,7 +104,7 @@ export function MainlyApp() {
   return (
     <div
       data-testid="root-layout"
-      className="bg-base p-3 h-screen md:min-w-[1024px] overflow-x-hidden flex flex-col md:flex-row gap-3"
+      className="bg-base h-screen md:min-w-[1024px] overflow-x-hidden flex flex-col md:flex-row"
     >
       <Sidebar />
 

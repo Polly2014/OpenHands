@@ -57,3 +57,19 @@ code {
 .markdown-body td {
   padding: 0.1rem 1rem;
 }
+
+.bg-base {
+  background-color: rgb(37, 38, 43);
+}
+
+.bg-base-secondary, .xterm-viewport, .conversation-chat-page {
+  background-color: rgb(25, 26, 31) !important;
+}
+
+.rounded-lg {
+  border-radius: 20px;
+}
+
+.chat-interface {
+  border: 0;
+}
